@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <opencv\highgui.h>
+#include <opencv2\imgproc\imgproc.hpp>
+
+using namespace cv;
+using namespace std;
+
+Mat kaynak, hedef;
+int deger = 100;
+
+RNG rng;
+
+vector<vector<Point>> counters;
+vector<Vec4i> mode;
+
+void edge(int,void*);
+
+int main(){
+	kaynak = imread("C:\\ves.jpg");
+	cvtColor(kaynak,kaynak,CV_RGB2GRAY);
+	blur(kaynak,kaynak,Size(3,3));
+	namedWindow("canny",WINDOW_AUTOSIZE);
+	createTrackbar("deger","canny",&deger,255,edge);
+	edge(0,0); // ilk acilis icin edge fonksiyonunun cagirilmasi
+	waitKey(0);
+}
+void edge(int,void*){
+	Canny(kaynak,hedef,deger,deger*2,3);
+	findContours(hedef, counters, mode, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0,0));
+	
+	Mat draw;
+	draw.create(hedef.size(),CV_8UC3);
+	draw = Scalar::all(0);
+
+	for (int i=0; i < counters.size();i++){
+		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 22), rng.uniform(0, 255));
+		drawContours(draw, counters, i, color, 2);
+	}
+
+	namedWindow("figure",WINDOW_AUTOSIZE);
+	imshow("figure",draw);
+
+
+}
