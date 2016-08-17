@@ -1,0 +1,41 @@
+#include <opencv2\highgui\highgui.hpp>
+#include <opencv2\imgproc\imgproc.hpp>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
+
+int main(){
+	/*Mat nesnelerimiz oluşturuluyor*/
+	Mat kaynak; 
+	Mat hedef, chedef;
+
+	VideoCapture cap;
+	cap.open(1); //Varsayılan webcam açılıyor
+
+	while (1){
+	
+		cap >> kaynak; //webcamden frame i alıp mat nesnesine aktar
+		cvtColor(kaynak, kaynak, CV_RGB2GRAY);
+		blur(kaynak, kaynak, Size(3, 3), Point(1, 1));
+		Canny(kaynak,hedef,50,200,3); // Canny Edge detector uygula
+		cvtColor(hedef,chedef,CV_GRAY2BGR);
+
+		vector<Vec4i> cizgiler; //cizgiler icin vektor olusturuluyor , (x1,y1,x2,y2) noktalar olmak üzere 4 integer
+
+		HoughLinesP(hedef, cizgiler, 1, CV_PI / 180, 50, 50, 10); // streamden çizgiler belirleniyor.
+
+		for (size_t i = 0; i < cizgiler.size();i++){
+			Vec4i l = cizgiler[i];
+			line(chedef, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 3, CV_AA); //cizgiler olusturuluyor
+		}
+
+		
+		imshow("orjinal",hedef);
+		imshow("Algilanan Cizgiler",chedef);
+		waitKey(33);	
+	}
+
+	return 0;
+
+}
